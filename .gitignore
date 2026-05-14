@@ -35,8 +35,9 @@ Thumbs.db
 logs/
 *.jsonl
 
-# Claude internals — local-only project state
+# Claude internals — local-only project state and instructions
 .claude/
+CLAUDE.md
 
 # OS / misc
 *.log
