@@ -42,6 +42,7 @@ class Honeypot:
         log_path="logs/captures.jsonl",
         detector_fn=None,
         response_headers=None,
+        rotate_max_bytes=50 * 1024 * 1024,
     ):
         self.payloads = dict(PAYLOADS) if payloads is None else dict(payloads)
         self.detector_fn = detector_fn or default_fingerprint
@@ -50,7 +51,7 @@ class Honeypot:
             if response_headers is None
             else dict(response_headers)
         )
-        self.log = CaptureLog(log_path)
+        self.log = CaptureLog(log_path, rotate_max_bytes=rotate_max_bytes)
 
     # -- payload access --------------------------------------------------
     def payload(self, name, default=""):
