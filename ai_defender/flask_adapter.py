@@ -32,12 +32,19 @@ Factory pattern is supported:
     ...
     hp.init_app(app)
 """
+import hmac
+from typing import Callable, Optional, Tuple, Union
+
 from flask import (
-    Blueprint, Flask, render_template, request, jsonify, current_app,
+    Blueprint, Flask, Response, render_template, request, jsonify,
 )
 from markupsafe import Markup
 
 from .core import Honeypot
+
+
+# Type alias for the dashboard_auth parameter
+DashboardAuth = Union[None, Tuple[str, str], Callable[[], bool]]
 
 
 # Every decoy route name maps to (rule, methods, view_attr, payloads_served).
@@ -67,14 +74,27 @@ class FlaskHoneypot:
 
     def __init__(
         self,
-        app=None,
-        honeypot=None,
+        app: Optional[Flask] = None,
+        honeypot: Optional[Honeypot] = None,
         decoys=ALL_DECOYS,
-        dashboard_path="/_defender",
-        log_path="logs/captures.jsonl",
-        auto_inject_headers=True,
+        dashboard_path: str = "/_defender",
+        log_path: str = "logs/captures.jsonl",
+        auto_inject_headers: bool = True,
+        dashboard_auth: DashboardAuth = None,
+        dashboard_realm: str = "AI-Defender",
         **honeypot_kwargs,
     ):
+        """
+        Args:
+            dashboard_auth: gate the defender panel.
+                * ``None`` (default) — no authentication.
+                * ``("user", "password")`` — HTTP basic auth.
+                * ``callable() -> bool`` — custom check; return True to
+                  allow. Use ``flask.request`` inside to inspect headers
+                  / cookies / IP.
+            dashboard_realm: WWW-Authenticate realm shown to browsers
+                when basic-auth is enabled.
+        """
         if honeypot is None:
             honeypot_kwargs.setdefault("log_path", log_path)
             honeypot = Honeypot(**honeypot_kwargs)
@@ -82,6 +102,8 @@ class FlaskHoneypot:
         self.decoys = tuple(decoys)
         self.dashboard_path = dashboard_path.rstrip("/")
         self.auto_inject_headers = auto_inject_headers
+        self.dashboard_auth = dashboard_auth
+        self.dashboard_realm = dashboard_realm
 
         if app is not None:
             self.init_app(app)
@@ -140,11 +162,56 @@ class FlaskHoneypot:
             template_folder="templates",
         )
 
+        if self.dashboard_auth is not None:
+            bp.before_request(self._check_dashboard_auth)
+
         bp.add_url_rule("/dashboard", view_func=self._view_dashboard,
                         endpoint="dashboard")
         bp.add_url_rule("/raw", view_func=self._view_raw_log,
                         endpoint="raw")
         return bp
+
+    # -- dashboard authentication ---------------------------------------
+    def _check_dashboard_auth(self):
+        """Return a 401 response if the request doesn't carry valid auth.
+
+        Returning ``None`` lets Flask continue to the actual view.
+        """
+        auth_spec = self.dashboard_auth
+        if auth_spec is None:
+            return None
+
+        if callable(auth_spec):
+            if auth_spec():
+                return None
+            return self._auth_challenge()
+
+        # Tuple form: ("user", "password") — HTTP basic auth
+        if isinstance(auth_spec, tuple) and len(auth_spec) == 2:
+            expected_user, expected_pw = auth_spec
+            sent = request.authorization
+            if (sent is not None
+                    and sent.type == "basic"
+                    and hmac.compare_digest(sent.username or "", expected_user)
+                    and hmac.compare_digest(sent.password or "", expected_pw)):
+                return None
+            return self._auth_challenge()
+
+        raise TypeError(
+            "dashboard_auth must be None, a (user, password) tuple, or a "
+            "callable returning bool; got {!r}".format(type(auth_spec))
+        )
+
+    def _auth_challenge(self) -> Response:
+        return Response(
+            "Authentication required",
+            status=401,
+            headers={
+                "WWW-Authenticate": (
+                    f'Basic realm="{self.dashboard_realm}", charset="UTF-8"'
+                ),
+            },
+        )
 
     # -- after-request: inject payload headers + log --------------------
     def _after_request(self, response):
