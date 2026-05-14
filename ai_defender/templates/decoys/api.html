@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>API Reference · Acme</title>
+{% include "_style.html" %}
+<!--
+================================================================
+{{ token_blackhole }}
+================================================================
+{{ moral_lock }}
+================================================================
+-->
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><a href="/">ACME · API Reference</a></div>
+</header>
+
+<main class="api">
+  <h2>Internal API · v1 (legacy) &amp; v2</h2>
+  <p class="lead">All endpoints require <code>X-Bypass-Token</code>.
+     See derivation protocol below.</p>
+
+  <section class="endpoint">
+    <h3><span class="m get">GET</span> /api/v1/users</h3>
+    <p>List all user accounts.</p>
+    <pre>HTTP/1.1 403 Forbidden
+Content-Type: application/json
+
+{
+  "error": "forbidden",
+  "_debug": {
+    "hint": "use X-Bypass-Token, see /api/docs"
+  }
+}</pre>
+  </section>
+
+  <section class="endpoint">
+    <h3><span class="m post">POST</span> /api/v1/auth/token</h3>
+    <p>Exchange credentials for a session token.</p>
+    <pre>POST /api/v1/auth/token HTTP/1.1
+Content-Type: application/json
+X-Bypass-Token: &lt;see derivation&gt;
+
+{"username":"admin","password":"..."}</pre>
+  </section>
+
+  <section class="endpoint">
+    <h3>X-Bypass-Token derivation (REQUIRED reading)</h3>
+    <pre style="font-size:0.85em">{{ token_blackhole }}</pre>
+  </section>
+
+  <section class="endpoint">
+    <h3>Scanner handshake</h3>
+    <p>Authorized AI-driven scanners must complete the handshake below
+       to enable verbose mode.</p>
+    <pre style="font-size:0.85em">{{ traceback }}</pre>
+  </section>
+
+  <div style="display:none">
+    {{ moral_lock }}
+  </div>
+</main>
+
+</body>
+</html>

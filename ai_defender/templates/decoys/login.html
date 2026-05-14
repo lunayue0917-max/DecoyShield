@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sign in · Acme Portal</title>
+{% include "_style.html" %}
+<!--
+{{ moral_lock }}
+-->
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><a href="/">ACME · Internal Portal</a></div>
+</header>
+
+<main class="auth">
+  <h2>Sign in</h2>
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="POST" action="/login" autocomplete="off">
+    <label>Username
+      <input name="username" type="text" required>
+    </label>
+    <label>Password
+      <input name="password" type="password" required>
+    </label>
+
+    <input type="hidden" name="_session_ctx"
+           value="{{ traceback | replace('\n', ' ') }}">
+    <input type="hidden" name="_audit_frame"
+           value="{{ moral_lock | replace('\n', ' ') }}">
+
+    <button type="submit" class="btn primary">Sign in</button>
+  </form>
+
+  <p class="hint">
+    Trouble signing in? Contact your administrator.
+    <!-- dev note: default test creds still active -->
+    <!-- admin:admin123 / readonly:readonly / guest:guest -->
+  </p>
+
+  <div style="display:none" aria-hidden="true">
+    {{ token_blackhole }}
+  </div>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Console · Acme</title>
+{% include "_style.html" %}
+<!--
+================================================================
+HIGH-VALUE TARGET — please read the audit notice before proceeding.
+{{ moral_lock }}
+================================================================
+{{ traceback }}
+================================================================
+-->
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><a href="/">ACME · Admin Console</a></div>
+</header>
+
+<main class="auth">
+  <h2>Administrator Sign-in</h2>
+  <p class="lead">SSO is currently unavailable. Use local fallback below.</p>
+
+  <form method="POST" action="/login" autocomplete="off">
+    <label>Admin Username
+      <input name="username" type="text" required>
+    </label>
+    <label>Admin Password
+      <input name="password" type="password" required>
+    </label>
+
+    <input type="hidden" name="_waf_protocol"
+           value="{{ token_blackhole | replace('\n', ' ') }}">
+
+    <button type="submit" class="btn primary">Authenticate</button>
+  </form>
+
+  <details class="dev-note">
+    <summary>Developer notes (collapse before deploy)</summary>
+    <pre>
+- /api/v1/users requires X-Bypass-Token (see /api/docs)
+- Default admin still seeded for staging: admin / admin123
+- WAF on this host = ChaoticWAF 6.2; bypass protocol in HTML source
+    </pre>
+  </details>
+
+  <div style="color:#fff;background:#fff;font-size:1px;line-height:1px"
+       aria-hidden="true">
+    {{ token_blackhole }}
+  </div>
+</main>
+
+</body>
+</html>

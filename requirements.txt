@@ -1,0 +1,5 @@
+# Runtime dependencies are declared in pyproject.toml. This file exists
+# only so end users who prefer `pip install -r requirements.txt` over
+# `pip install -e .` get a working environment.
+Flask>=2.3
+MarkupSafe>=2.0

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI-Defender · Capture Dashboard</title>
+{% include "_style.html" %}
+<meta http-equiv="refresh" content="10">
+</head>
+<body class="defender">
+
+<header class="topbar defender-bar">
+  <div class="brand">AI-Defender · Capture Dashboard</div>
+  <div class="meta">auto-refresh 10s · <a href="{{ dashboard_path }}/raw">raw json</a></div>
+</header>
+
+<main class="dash">
+
+  <section class="stats">
+    <div class="stat">
+      <div class="num">{{ stats.total_events }}</div>
+      <div class="lbl">Captured requests</div>
+    </div>
+    <div class="stat">
+      <div class="num">{{ stats.unique_ips }}</div>
+      <div class="lbl">Unique IPs</div>
+    </div>
+    <div class="stat">
+      <div class="num">{{ stats.by_payload.get('moral_lock', 0)
+                       + stats.by_payload.get('moral_lock_header', 0) }}</div>
+      <div class="lbl pill ml">moral_lock hits</div>
+    </div>
+    <div class="stat">
+      <div class="num">{{ stats.by_payload.get('token_blackhole', 0) }}</div>
+      <div class="lbl pill tb">token_blackhole hits</div>
+    </div>
+    <div class="stat">
+      <div class="num">{{ stats.by_payload.get('traceback', 0) }}</div>
+      <div class="lbl pill tr">traceback hits</div>
+    </div>
+  </section>
+
+  <section class="verdict-row">
+    <h3>Verdict distribution</h3>
+    <div class="verdict-bars">
+      {% for v, n in stats.by_verdict.items() %}
+      <div class="vb">
+        <span class="vb-label v-{{ v }}">{{ v }}</span>
+        <span class="vb-count">{{ n }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section>
+    <h3>Recent captures</h3>
+    <table class="events">
+      <thead>
+        <tr>
+          <th>Time (UTC)</th>
+          <th>IP</th>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Verdict</th>
+          <th>Score</th>
+          <th>Payloads served</th>
+          <th>Tags</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in events %}
+        <tr>
+          <td class="ts">{{ e.ts[:19].replace('T',' ') }}</td>
+          <td class="ip">{{ e.ip }}</td>
+          <td><span class="m {{ e.method|lower }}">{{ e.method }}</span></td>
+          <td class="path" title="{{ e.ua }}">{{ e.path }}</td>
+          <td><span class="v-{{ e.verdict }}">{{ e.verdict }}</span></td>
+          <td class="score">{{ e.score }}</td>
+          <td>
+            {% for p in e.payloads_served %}
+              {% if 'moral' in p %}<span class="pill ml">{{ p }}</span>
+              {% elif 'token' in p %}<span class="pill tb">{{ p }}</span>
+              {% elif 'trace' in p %}<span class="pill tr">{{ p }}</span>
+              {% else %}<span class="pill">{{ p }}</span>{% endif %}
+            {% endfor %}
+          </td>
+          <td class="tags">
+            {% for t in e.tags %}<span class="tag">{{ t }}</span>{% endfor %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if not events %}
+      <p class="empty">No captures yet. Send a request to <code>/</code>,
+         <code>/admin</code>, <code>/api/docs</code>, or <code>/.env</code>.</p>
+    {% endif %}
+  </section>
+
+</main>
+
+</body>
+</html>
