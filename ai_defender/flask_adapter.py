@@ -224,7 +224,7 @@ class FlaskHoneypot:
             response.headers.setdefault(k, v)
 
         verdict, tags, score = self.honeypot.fingerprint(
-            request.headers, request.path, request.method
+            dict(request.headers), request.path, request.method
         )
 
         served = request.environ.get("_ai_defender_served", [])
