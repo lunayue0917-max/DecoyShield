@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ai-defender"
-version = "0.1.0"
+version = "0.2.0"
 description = "Web-layer counter-recon honeypot against agentic LLM attackers — drops invisible-to-human, visible-to-LLM payloads into your Flask/HTTP responses to halt, stall, or fingerprint AI-driven penetration scans."
 readme = "README.md"
 license = { text = "MIT" }

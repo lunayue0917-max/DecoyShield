@@ -6,6 +6,8 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-05-14
+
 ### Added
 - **Dashboard authentication** — `FlaskHoneypot(dashboard_auth=...)` accepts
   `None` (default, open), an `("user", "password")` tuple for HTTP basic
@@ -55,5 +57,6 @@ Initial release.
 - Examples: `examples/flask_demo.py`, `examples/custom_payloads.py`.
 - MIT license, packaging via `pyproject.toml`.
 
-[Unreleased]: https://github.com/lunayue0917-max/AI-Defender/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/lunayue0917-max/AI-Defender/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/lunayue0917-max/AI-Defender/releases/tag/v0.2.0
 [0.1.0]: https://github.com/lunayue0917-max/AI-Defender/releases/tag/v0.1.0
