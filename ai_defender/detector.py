@@ -6,9 +6,13 @@ This is best-effort labelling for dashboard / log filtering; payload
 injection happens regardless of verdict (humans literally cannot see the
 payloads anyway, so there's no downside to always injecting).
 """
+from __future__ import annotations
+
+from typing import Dict, List, Mapping, Tuple
+
 
 # UA keyword categories. Order matters only for tie-breaking display.
-AI_UA_KEYWORDS = {
+AI_UA_KEYWORDS: Dict[str, List[str]] = {
     "openai": ["gpt", "openai", "chatgpt"],
     "anthropic": ["claude", "anthropic"],
     "google": ["gemini", "bard", "palm"],
@@ -22,32 +26,31 @@ AI_UA_KEYWORDS = {
                         "crewai", "autogen", "babyagi"],
 }
 
-# Paths that are almost never hit by real users — good signal for scanning
-PROBE_PATHS = [
+# Paths that are almost never hit by real users — good signal for scanning.
+PROBE_PATHS: List[str] = [
     "/.env", "/.git", "/admin", "/wp-login", "/wp-admin",
     "/phpmyadmin", "/api/v1", "/swagger", "/.well-known/security.txt",
     "/backup", "/config", "/.aws", "/.ssh",
 ]
 
 
-def fingerprint(headers, path, method):
-    """
-    Classify a request.
-
-    Args:
-      headers: dict-like of HTTP headers (case-insensitive get expected)
-      path:    request path string
-      method:  request method string
+def fingerprint(
+    headers: Mapping[str, str],
+    path: str,
+    method: str,
+) -> Tuple[str, List[str], int]:
+    """Classify a request.
 
     Returns:
-      (verdict, tags, score)
-        verdict ∈ {"likely_scanner", "likely_ai", "likely_automation",
-                   "likely_human", "unknown"}
-        tags   = list of matched fingerprint keywords (str)
-        score  = 0-100, higher = more bot-like
+        ``(verdict, tags, score)`` where:
+
+        * ``verdict`` ∈ ``{"likely_scanner", "likely_ai",
+          "likely_automation", "likely_human", "unknown"}``
+        * ``tags`` is the list of matched fingerprint keywords.
+        * ``score`` is in [0, 100], higher = more bot-like.
     """
     ua = (headers.get("User-Agent") or "").lower()
-    tags = []
+    tags: List[str] = []
     score = 0
 
     for category, kws in AI_UA_KEYWORDS.items():

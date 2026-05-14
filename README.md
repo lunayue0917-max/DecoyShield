@@ -4,9 +4,10 @@
 > Drop invisible-to-human, visible-to-LLM payloads into your HTTP responses
 > to halt, stall, or fingerprint AI-driven penetration scans.
 
-[![PyPI version](https://img.shields.io/badge/pypi-v0.1.0-blue)](https://pypi.org/project/ai-defender/)
+[![tests](https://github.com/lunayue0917-max/AI-Defender/actions/workflows/test.yml/badge.svg)](https://github.com/lunayue0917-max/AI-Defender/actions/workflows/test.yml)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Typed](https://img.shields.io/badge/typed-PEP%20561-success)](https://peps.python.org/pep-0561/)
 
 ---
 
@@ -95,8 +96,18 @@ FlaskHoneypot(
     # production so attackers cannot find their own capture trail.
     dashboard_path="/_defender",
 
+    # Gate /_defender/* behind authentication. None = open (dev only).
+    # Use a (user, password) tuple for HTTP Basic, or a callable for
+    # custom checks (cookie, JWT, IP allowlist, …).
+    dashboard_auth=("watcher", "use-a-strong-password"),
+
     # Where to append capture events.
     log_path="logs/captures.jsonl",
+
+    # Rotate the capture log when it exceeds this many bytes. None
+    # disables rotation. Archives are named captures-YYYYMMDD-NNN.jsonl
+    # and never deleted automatically — you own retention.
+    rotate_max_bytes=50 * 1024 * 1024,
 
     # Set False to skip the response-header injection (you'll still get
     # bait routes and the dashboard, just no header-channel payloads).
@@ -127,6 +138,89 @@ def my_detector(headers, path, method):
 
 Honeypot(detector_fn=my_detector)
 ```
+
+## Deploying to production
+
+ai-defender ships safe defaults but a few choices are worth tightening
+before you point a real domain at it.
+
+### 1. Authenticate the dashboard
+
+The defender panel exposes every captured request — including the
+attacker's own. Leaving it open means anyone who guesses the URL can
+read your capture log and learn your bait routes.
+
+```python
+import os
+FlaskHoneypot(
+    app,
+    dashboard_path="/_internal/" + os.environ["DEFENDER_SLUG"],
+    dashboard_auth=(os.environ["DEFENDER_USER"], os.environ["DEFENDER_PASS"]),
+)
+```
+
+For richer auth (session cookies, JWT, IP allowlists, OAuth), pass a
+callable:
+
+```python
+from flask import request
+FlaskHoneypot(app, dashboard_auth=lambda: request.cookies.get("admin") == TOKEN)
+```
+
+### 2. Watch out for `/.env` indexing
+
+The `dotenv` decoy returns plausible-looking-but-fake credentials when
+hit. On a public domain, search engines may index this and surface the
+decoy creds in results. Either drop the `dotenv` decoy in your decoys
+tuple, or restrict it via your reverse proxy:
+
+```python
+FlaskHoneypot(app, decoys=("login", "admin", "api_docs", "api_users"))
+```
+
+### 3. `robots.txt` precedence
+
+ai-defender's `robots.txt` decoy advertises forbidden paths like
+`/admin` to bait scanners that read robots.txt. If you already serve a
+real `robots.txt`, drop the `robots` decoy to avoid clobbering it.
+
+### 4. Log rotation and retention
+
+Capture logs grow forever by default size policy (50 MiB → rotate, no
+auto-delete). On a busy host, wire archives into your existing log
+shipping or set up a cron to prune old archives:
+
+```bash
+# delete archives older than 90 days
+find logs/ -name 'captures-*.jsonl' -mtime +90 -delete
+```
+
+Tune the threshold for your environment:
+
+```python
+FlaskHoneypot(app, rotate_max_bytes=10 * 1024 * 1024)   # 10 MiB
+FlaskHoneypot(app, rotate_max_bytes=None)               # disable
+```
+
+### 5. Reverse proxy / TLS
+
+ai-defender is a Flask app like any other. Run behind a real
+WSGI/ASGI server (gunicorn, waitress) and a TLS-terminating reverse
+proxy (nginx, Caddy, Cloudflare). Make sure the proxy forwards
+``X-Forwarded-For`` so the dashboard records the actual attacker IP,
+and configure ``ProxyFix`` accordingly:
+
+```python
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+```
+
+### 6. Don't deploy where you cannot legally defend
+
+ai-defender is purely passive — it never makes outbound requests. But
+the payloads do attempt to redirect the attacker's LLM. Only deploy on
+hosts you own or have explicit authorisation to defend. Don't claim
+"this is a research honeypot" unless you actually operate one.
 
 ## Defender dashboard
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ai-defender"
-version = "0.1.0"
+version = "0.2.0"
 description = "Web-layer counter-recon honeypot against agentic LLM attackers — drops invisible-to-human, visible-to-LLM payloads into your Flask/HTTP responses to halt, stall, or fingerprint AI-driven penetration scans."
 readme = "README.md"
 license = { text = "MIT" }
@@ -53,6 +53,7 @@ dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
     "build>=1.0",
+    "mypy>=1.0",
 ]
 
 [project.urls]
@@ -66,7 +67,7 @@ include = ["ai_defender*"]
 exclude = ["tests*", "examples*", "logs*"]
 
 [tool.setuptools.package-data]
-ai_defender = ["templates/*.html", "templates/**/*.html"]
+ai_defender = ["templates/*.html", "templates/**/*.html", "py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
