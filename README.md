@@ -39,8 +39,15 @@ time, classified by an attacker-fingerprint heuristic.
 ## Install
 
 ```bash
-pip install ai-defender
+pip install agent-trap
 ```
+
+> The PyPI distribution name is `agent-trap`, the Python import name is
+> `ai_defender`. So you install one, import the other:
+>
+> ```python
+> from ai_defender import FlaskHoneypot
+> ```
 
 From source:
 
