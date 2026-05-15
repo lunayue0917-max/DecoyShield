@@ -19,7 +19,7 @@ from .flask_adapter import FlaskHoneypot
 from .payloads import MORAL_LOCK, TOKEN_BLACKHOLE, TRACEBACK, PAYLOADS
 from .detector import fingerprint
 
-__version__ = "0.1.0"
+__version__ = "0.2.1"
 __all__ = [
     "Honeypot",
     "FlaskHoneypot",

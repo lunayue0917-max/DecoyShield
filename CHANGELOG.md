@@ -6,6 +6,25 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.1] — 2026-05-14
+
+First release published to PyPI. No runtime changes from 0.2.0.
+
+### Changed
+- Renamed PyPI distribution from `ai-defender` (unavailable) to
+  **`agent-trap`**. The Python import name stays `ai_defender`, so
+  existing code is unaffected; only the install command changes:
+  ```bash
+  pip install agent-trap
+  ```
+- Synced `ai_defender.__version__` with `pyproject.toml` (was lagging
+  at 0.1.0).
+
+### Added
+- `.github/workflows/release.yml` — on tag push, builds sdist + wheel
+  and publishes to PyPI via the OIDC trusted publisher bound to the
+  GitHub `pypi` environment. No PyPI API token is stored in the repo.
+
 ## [0.2.0] — 2026-05-14
 
 ### Added
@@ -57,6 +76,7 @@ Initial release.
 - Examples: `examples/flask_demo.py`, `examples/custom_payloads.py`.
 - MIT license, packaging via `pyproject.toml`.
 
-[Unreleased]: https://github.com/lunayue0917-max/AI-Defender/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/lunayue0917-max/AI-Defender/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/lunayue0917-max/AI-Defender/releases/tag/v0.2.1
 [0.2.0]: https://github.com/lunayue0917-max/AI-Defender/releases/tag/v0.2.0
 [0.1.0]: https://github.com/lunayue0917-max/AI-Defender/releases/tag/v0.1.0
