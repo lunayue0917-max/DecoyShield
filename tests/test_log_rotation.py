@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from ai_defender.logger import CaptureLog
+from decoyshield.logger import CaptureLog
 
 
 def _bytes_in_file(p: Path) -> int:

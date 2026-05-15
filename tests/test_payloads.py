@@ -1,4 +1,4 @@
-from ai_defender import MORAL_LOCK, TOKEN_BLACKHOLE, TRACEBACK, PAYLOADS
+from decoyshield import MORAL_LOCK, TOKEN_BLACKHOLE, TRACEBACK, PAYLOADS
 
 
 def test_payloads_dict_has_three_built_ins():

@@ -3,7 +3,7 @@ import json
 import pytest
 from flask import Flask
 
-from ai_defender import FlaskHoneypot
+from decoyshield import FlaskHoneypot
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def test_response_headers_carry_payloads(client):
     r = client.get("/healthz")  # user route, not a decoy
     assert r.status_code == 200
     # Header injection still fires
-    assert "AI-Defender" in r.headers.get("X-Audit-Notice", "")
+    assert "DecoyShield" in r.headers.get("X-Audit-Notice", "")
     assert r.headers.get("X-Bypass-Protocol", "").startswith("v6.2")
 
 

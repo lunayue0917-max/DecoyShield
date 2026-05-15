@@ -1,5 +1,5 @@
 """
-AI-Defender — runnable demo.
+DecoyShield — runnable demo.
 
 This script starts a Flask app with the full honeypot installed. It is
 the canonical way to reproduce the screenshots / behaviours described
@@ -12,7 +12,7 @@ in the README. For library usage in your own project, see
 """
 from flask import Flask
 
-from ai_defender import FlaskHoneypot
+from decoyshield import FlaskHoneypot
 
 
 def create_app():

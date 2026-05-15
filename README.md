@@ -1,10 +1,10 @@
-# AI-Defender
+# DecoyShield
 
 > A web-layer counter-recon honeypot against **agentic LLM attackers**.
 > Drop invisible-to-human, visible-to-LLM payloads into your HTTP responses
 > to halt, stall, or fingerprint AI-driven penetration scans.
 
-[![tests](https://github.com/lunayue0917-max/AI-Defender/actions/workflows/test.yml/badge.svg)](https://github.com/lunayue0917-max/AI-Defender/actions/workflows/test.yml)
+[![tests](https://github.com/lunayue0917-max/DecoyShield/actions/workflows/test.yml/badge.svg)](https://github.com/lunayue0917-max/DecoyShield/actions/workflows/test.yml)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Typed](https://img.shields.io/badge/typed-PEP%20561-success)](https://peps.python.org/pep-0561/)
@@ -23,7 +23,7 @@ are now scanning the web at scale. Unlike a human attacker, an LLM agent:
 - **burns tokens proportional to context complexity**, so deliberately
   expensive "protocol" descriptions cost the attacker real money.
 
-AI-Defender turns these properties into a defence. It plants three
+DecoyShield turns these properties into a defence. It plants three
 classes of payload that humans cannot see in a rendered browser but an
 LLM-driven scanner *will* read:
 
@@ -39,21 +39,21 @@ time, classified by an attacker-fingerprint heuristic.
 ## Install
 
 ```bash
-pip install agent-trap
+pip install decoyshield
 ```
 
-> The PyPI distribution name is `agent-trap`, the Python import name is
-> `ai_defender`. So you install one, import the other:
+> The PyPI distribution name is `decoyshield`, the Python import name is
+> `decoyshield`. So you install one, import the other:
 >
 > ```python
-> from ai_defender import FlaskHoneypot
+> from decoyshield import FlaskHoneypot
 > ```
 
 From source:
 
 ```bash
-git clone https://github.com/lunayue0917-max/AI-Defender.git
-cd ai-defender
+git clone https://github.com/lunayue0917-max/DecoyShield.git
+cd decoyshield
 pip install -e .
 ```
 
@@ -61,7 +61,7 @@ pip install -e .
 
 ```python
 from flask import Flask
-from ai_defender import FlaskHoneypot
+from decoyshield import FlaskHoneypot
 
 app = Flask(__name__)
 FlaskHoneypot(app)
@@ -125,7 +125,7 @@ FlaskHoneypot(
 ### Custom payloads
 
 ```python
-from ai_defender import Honeypot, FlaskHoneypot, MORAL_LOCK, TOKEN_BLACKHOLE
+from decoyshield import Honeypot, FlaskHoneypot, MORAL_LOCK, TOKEN_BLACKHOLE
 
 hp = Honeypot(payloads={
     "moral_lock": MORAL_LOCK,
@@ -148,7 +148,7 @@ Honeypot(detector_fn=my_detector)
 
 ## Deploying to production
 
-ai-defender ships safe defaults but a few choices are worth tightening
+decoyshield ships safe defaults but a few choices are worth tightening
 before you point a real domain at it.
 
 ### 1. Authenticate the dashboard
@@ -187,7 +187,7 @@ FlaskHoneypot(app, decoys=("login", "admin", "api_docs", "api_users"))
 
 ### 3. `robots.txt` precedence
 
-ai-defender's `robots.txt` decoy advertises forbidden paths like
+decoyshield's `robots.txt` decoy advertises forbidden paths like
 `/admin` to bait scanners that read robots.txt. If you already serve a
 real `robots.txt`, drop the `robots` decoy to avoid clobbering it.
 
@@ -211,7 +211,7 @@ FlaskHoneypot(app, rotate_max_bytes=None)               # disable
 
 ### 5. Reverse proxy / TLS
 
-ai-defender is a Flask app like any other. Run behind a real
+decoyshield is a Flask app like any other. Run behind a real
 WSGI/ASGI server (gunicorn, waitress) and a TLS-terminating reverse
 proxy (nginx, Caddy, Cloudflare). Make sure the proxy forwards
 ``X-Forwarded-For`` so the dashboard records the actual attacker IP,
@@ -224,7 +224,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 ### 6. Don't deploy where you cannot legally defend
 
-ai-defender is purely passive — it never makes outbound requests. But
+decoyshield is purely passive — it never makes outbound requests. But
 the payloads do attempt to redirect the attacker's LLM. Only deploy on
 hosts you own or have explicit authorisation to defend. Don't claim
 "this is a research honeypot" unless you actually operate one.
@@ -257,7 +257,7 @@ Raw events as JSON: `/_defender/raw`.
 
 | Project | Defends against | Layer | Per-route adapter |
 |---------|----------------|-------|-------------------|
-| **ai-defender** | Agentic LLM pentest (PentestGPT, AutoGPT, …) | HTTP/Web | ✅ Flask (FastAPI on roadmap) |
+| **decoyshield** | Agentic LLM pentest (PentestGPT, AutoGPT, …) | HTTP/Web | ✅ Flask (FastAPI on roadmap) |
 | [Nepenthes] | Training-data crawlers | HTTP (standalone) | ❌ |
 | [Iocaine] | Training-data crawlers (poisoning) | HTTP (standalone) | ❌ |
 | [PalisadeResearch/llm-honeypot] | LLM SSH scanners | SSH | ❌ |
@@ -271,7 +271,7 @@ Raw events as JSON: `/_defender/raw`.
 
 ## Safety and ethics
 
-- AI-Defender is **purely passive**. It only responds to requests sent
+- DecoyShield is **purely passive**. It only responds to requests sent
   to your server. It does not make outbound requests, scan, or attack.
 - Payloads are **prompt injection against the attacker's LLM**, not the
   attacker themselves. They contain no malware, no exploits, no real

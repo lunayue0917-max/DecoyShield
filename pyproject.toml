@@ -3,14 +3,14 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agent-trap"
-version = "0.2.1"
+name = "decoyshield"
+version = "0.3.0"
 description = "Web-layer counter-recon honeypot against agentic LLM attackers — drops invisible-to-human, visible-to-LLM payloads into your Flask/HTTP responses to halt, stall, or fingerprint AI-driven penetration scans."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"
 authors = [
-    { name = "AI-Defender contributors" },
+    { name = "DecoyShield contributors" },
 ]
 keywords = [
     "honeypot",
@@ -57,17 +57,17 @@ dev = [
 ]
 
 [project.urls]
-Homepage    = "https://github.com/lunayue0917-max/AI-Defender"
-Repository  = "https://github.com/lunayue0917-max/AI-Defender"
-Issues      = "https://github.com/lunayue0917-max/AI-Defender/issues"
-Changelog   = "https://github.com/lunayue0917-max/AI-Defender/blob/main/CHANGELOG.md"
+Homepage    = "https://github.com/lunayue0917-max/DecoyShield"
+Repository  = "https://github.com/lunayue0917-max/DecoyShield"
+Issues      = "https://github.com/lunayue0917-max/DecoyShield/issues"
+Changelog   = "https://github.com/lunayue0917-max/DecoyShield/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
-include = ["ai_defender*"]
+include = ["decoyshield*"]
 exclude = ["tests*", "examples*", "logs*"]
 
 [tool.setuptools.package-data]
-ai_defender = ["templates/*.html", "templates/**/*.html", "py.typed"]
+decoyshield = ["templates/*.html", "templates/**/*.html", "py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

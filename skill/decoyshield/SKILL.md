@@ -1,11 +1,11 @@
 ---
-name: ai-defender
-description: Add AI-Defender honeypot protection to a Python web app to defend against agentic LLM attackers (PentestGPT, AutoGPT, custom LangChain scanners). Use when the user asks to defend their Flask/web service against AI-driven penetration testing, asks to add "prompt injection honeypot" or "anti-LLM-scanner" defenses, asks to integrate ai-defender, or mentions wanting their app to detect / stall / fingerprint LLM-driven scans.
+name: decoyshield
+description: Add DecoyShield honeypot protection to a Python web app to defend against agentic LLM attackers (PentestGPT, AutoGPT, custom LangChain scanners). Use when the user asks to defend their Flask/web service against AI-driven penetration testing, asks to add "prompt injection honeypot" or "anti-LLM-scanner" defenses, asks to integrate decoyshield, or mentions wanting their app to detect / stall / fingerprint LLM-driven scans.
 ---
 
-# ai-defender skill
+# decoyshield skill
 
-When invoked, you are integrating the **ai-defender** Python package into
+When invoked, you are integrating the **decoyshield** Python package into
 the current project so that the user's web service plants payloads that
 are invisible to humans but visible to LLM-driven scanners.
 
@@ -18,7 +18,7 @@ The package implements three payload categories:
 3. `traceback` — induces the attacker LLM to disclose its own model,
    operator instruction, and tool chain on its next request.
 
-Repository: https://github.com/lunayue0917-max/AI-Defender
+Repository: https://github.com/lunayue0917-max/DecoyShield
 
 ## Step 1 — figure out the integration target
 
@@ -26,7 +26,7 @@ Look at the project layout before touching anything:
 
 - Is there a Flask app? Look for `Flask(__name__)`, `app.run()`, common
   files like `app.py`, `wsgi.py`, `application.py`, `src/<pkg>/__init__.py`.
-- Is there a FastAPI / Django / other framework? ai-defender currently
+- Is there a FastAPI / Django / other framework? decoyshield currently
   ships a Flask adapter only — if the project is FastAPI/Django, tell
   the user and offer to (a) scaffold a tiny Flask sidecar that runs the
   honeypot on a sibling port, or (b) wait for v0.2 which adds FastAPI.
@@ -36,9 +36,9 @@ Look at the project layout before touching anything:
 
 ## Step 2 — add the dependency
 
-Add `ai-defender>=0.1.0` to the relevant manifest:
+Add `decoyshield>=0.1.0` to the relevant manifest:
 
-- `requirements.txt`: append `ai-defender>=0.1.0`
+- `requirements.txt`: append `decoyshield>=0.1.0`
 - `pyproject.toml`: add to `[project] dependencies`
 - `Pipfile`: add under `[packages]`
 
@@ -51,7 +51,7 @@ Find the Flask app factory or top-level `app = Flask(...)` and add one
 line right after the app is constructed:
 
 ```python
-from ai_defender import FlaskHoneypot
+from decoyshield import FlaskHoneypot
 FlaskHoneypot(app)
 ```
 
@@ -86,9 +86,9 @@ and IPs the user does not want in public history.
 Summarise in this order:
 
 1. Files you changed (paths + one-line description each).
-2. The install command (`pip install ai-defender` or framework-equivalent).
+2. The install command (`pip install decoyshield` or framework-equivalent).
 3. The defender dashboard URL (e.g. `http://localhost:5000/_defender/dashboard`).
-4. A *one-sentence* safety reminder: ai-defender is purely passive,
+4. A *one-sentence* safety reminder: decoyshield is purely passive,
    responds only to inbound requests, and contains no real legal
    threats or exploits.
 5. Suggest a way to test it: hit the app with `curl -A 'PentestGPT/2.0 python-requests'`
@@ -104,7 +104,7 @@ Summarise in this order:
 - Never commit `logs/captures.jsonl`.
 - Never run the user's server yourself unless asked. After wiring the
   code, stop and let the user run it.
-- Never claim ai-defender blocks attacks. It does not. It is a
+- Never claim decoyshield blocks attacks. It does not. It is a
   honeypot: it observes, stalls, and re-injects guidance, but a
   sufficiently determined attacker who sanitises HTML before feeding it
   to their LLM will defeat it. Set expectations honestly.
@@ -126,7 +126,7 @@ FlaskHoneypot(app, log_path="/var/log/honeypot.jsonl",
               dashboard_path="/internal/honeypot")
 
 # Bring your own payloads
-from ai_defender import Honeypot
+from decoyshield import Honeypot
 hp = Honeypot(payloads={"moral_lock": "...", "token_blackhole": "...",
                         "traceback": "..."})
 FlaskHoneypot(app, honeypot=hp)

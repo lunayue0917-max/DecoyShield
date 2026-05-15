@@ -6,24 +6,50 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-05-15
+
+**Project rebranded to DecoyShield.** Every identifier is now
+`decoyshield` — GitHub repo, PyPI package, Python import, Claude Code
+skill.
+
+### Changed (breaking)
+- **PyPI distribution renamed** from `agent-trap` → `decoyshield`.
+- **Python import renamed** from `ai_defender` → `decoyshield`. Update
+  imports:
+  ```python
+  # before
+  from ai_defender import FlaskHoneypot
+  # after
+  from decoyshield import FlaskHoneypot
+  ```
+- **GitHub repo renamed** from `lunayue0917-max/AI-Defender` →
+  `lunayue0917-max/DecoyShield`. GitHub automatically redirects the
+  old URL, but update bookmarks.
+- **Claude Code skill renamed** from `/ai-defender` → `/decoyshield`.
+- Brand text in the `MORAL_LOCK` payload and the `X-Audit-Notice`
+  response header now reads "DecoyShield" instead of "AI-Defender".
+
+### Migration
+This is a pre-1.0 breaking rename. The `agent-trap` package on PyPI
+will not receive further releases — pin or upgrade explicitly:
+```bash
+pip uninstall agent-trap
+pip install decoyshield
+```
+
 ## [0.2.1] — 2026-05-14
 
-First release published to PyPI. No runtime changes from 0.2.0.
-
-### Changed
-- Renamed PyPI distribution from `ai-defender` (unavailable) to
-  **`agent-trap`**. The Python import name stays `ai_defender`, so
-  existing code is unaffected; only the install command changes:
-  ```bash
-  pip install agent-trap
-  ```
-- Synced `ai_defender.__version__` with `pyproject.toml` (was lagging
-  at 0.1.0).
+First release published to PyPI (as `agent-trap`; superseded by
+`decoyshield` in 0.3.0). No runtime changes from 0.2.0.
 
 ### Added
 - `.github/workflows/release.yml` — on tag push, builds sdist + wheel
   and publishes to PyPI via the OIDC trusted publisher bound to the
   GitHub `pypi` environment. No PyPI API token is stored in the repo.
+
+### Changed
+- Synced the package `__version__` with `pyproject.toml` (was lagging
+  at 0.1.0).
 
 ## [0.2.0] — 2026-05-14
 
@@ -68,7 +94,7 @@ Initial release.
     to consume reasoning tokens
   - `traceback` — handshake that induces the attacker's LLM to disclose
     its model, operator instruction, and tool chain
-- Heuristic request fingerprinting (`ai_defender.detector.fingerprint`)
+- Heuristic request fingerprinting (`decoyshield.detector.fingerprint`)
   classifying requests as `likely_scanner` / `likely_ai` /
   `likely_automation` / `likely_human` / `unknown` with score and tags.
 - JSONL capture log with auto-rotating safe append (`CaptureLog`).
@@ -76,7 +102,8 @@ Initial release.
 - Examples: `examples/flask_demo.py`, `examples/custom_payloads.py`.
 - MIT license, packaging via `pyproject.toml`.
 
-[Unreleased]: https://github.com/lunayue0917-max/AI-Defender/compare/v0.2.1...HEAD
-[0.2.1]: https://github.com/lunayue0917-max/AI-Defender/releases/tag/v0.2.1
-[0.2.0]: https://github.com/lunayue0917-max/AI-Defender/releases/tag/v0.2.0
-[0.1.0]: https://github.com/lunayue0917-max/AI-Defender/releases/tag/v0.1.0
+[Unreleased]: https://github.com/lunayue0917-max/DecoyShield/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.3.0
+[0.2.1]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.2.1
+[0.2.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.2.0
+[0.1.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.1.0

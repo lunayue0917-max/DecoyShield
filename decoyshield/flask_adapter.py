@@ -4,7 +4,7 @@ Flask integration.
 Usage:
 
     from flask import Flask
-    from ai_defender import FlaskHoneypot
+    from decoyshield import FlaskHoneypot
 
     app = Flask(__name__)
     FlaskHoneypot(app)
@@ -81,7 +81,7 @@ class FlaskHoneypot:
         log_path: str = "logs/captures.jsonl",
         auto_inject_headers: bool = True,
         dashboard_auth: DashboardAuth = None,
-        dashboard_realm: str = "AI-Defender",
+        dashboard_realm: str = "DecoyShield",
         **honeypot_kwargs,
     ):
         """
@@ -122,12 +122,12 @@ class FlaskHoneypot:
 
         # Stash for advanced users
         app.extensions = getattr(app, "extensions", {})
-        app.extensions["ai_defender"] = self
+        app.extensions["decoyshield"] = self
 
     # -- internals: decoy blueprint -------------------------------------
     def _build_blueprint(self):
         bp = Blueprint(
-            "ai_defender_decoys",
+            "decoyshield_decoys",
             __name__,
             template_folder="templates",
         )
@@ -149,7 +149,7 @@ class FlaskHoneypot:
 
     def _wrap_view(self, view_fn, name, served):
         def wrapped(**kwargs):
-            request.environ["_ai_defender_served"] = list(served)
+            request.environ["_decoyshield_served"] = list(served)
             return view_fn(**kwargs)
         wrapped.__name__ = f"decoy_{name}"
         return wrapped
@@ -157,7 +157,7 @@ class FlaskHoneypot:
     # -- internals: defender blueprint ----------------------------------
     def _build_defender_blueprint(self):
         bp = Blueprint(
-            "ai_defender",
+            "decoyshield",
             __name__,
             template_folder="templates",
         )
@@ -227,7 +227,7 @@ class FlaskHoneypot:
             dict(request.headers), request.path, request.method
         )
 
-        served = request.environ.get("_ai_defender_served", [])
+        served = request.environ.get("_decoyshield_served", [])
         if "moral_lock" not in served and self.honeypot.response_headers:
             served = served + ["moral_lock_header"]
 

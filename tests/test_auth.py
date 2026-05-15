@@ -4,7 +4,7 @@ import base64
 import pytest
 from flask import Flask, request
 
-from ai_defender import FlaskHoneypot
+from decoyshield import FlaskHoneypot
 
 
 def _basic_header(user: str, password: str) -> dict:

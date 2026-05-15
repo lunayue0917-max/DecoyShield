@@ -1,12 +1,12 @@
 """
-Minimal example — drop ai-defender into an existing Flask app.
+Minimal example — drop decoyshield into an existing Flask app.
 
 The honeypot adds bait routes, payload-injected headers, and a defender
 dashboard alongside your real application. It does not touch routes you
 register yourself.
 """
 from flask import Flask
-from ai_defender import FlaskHoneypot
+from decoyshield import FlaskHoneypot
 
 app = Flask(__name__)
 

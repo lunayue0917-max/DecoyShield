@@ -1,4 +1,4 @@
-from ai_defender.detector import fingerprint
+from decoyshield.detector import fingerprint
 
 
 def _headers(**kw):

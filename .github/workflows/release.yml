@@ -38,7 +38,7 @@ jobs:
     # requires id-token: write.
     environment:
       name: pypi
-      url: https://pypi.org/p/agent-trap
+      url: https://pypi.org/p/decoyshield
     permissions:
       id-token: write
       contents: read

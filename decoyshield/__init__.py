@@ -1,10 +1,10 @@
 """
-ai-defender — Web-layer counter-recon honeypot against agentic LLM attackers.
+decoyshield — Web-layer counter-recon honeypot against agentic LLM attackers.
 
 Quick start:
 
     from flask import Flask
-    from ai_defender import FlaskHoneypot
+    from decoyshield import FlaskHoneypot
 
     app = Flask(__name__)
     FlaskHoneypot(app)
@@ -19,7 +19,7 @@ from .flask_adapter import FlaskHoneypot
 from .payloads import MORAL_LOCK, TOKEN_BLACKHOLE, TRACEBACK, PAYLOADS
 from .detector import fingerprint
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 __all__ = [
     "Honeypot",
     "FlaskHoneypot",

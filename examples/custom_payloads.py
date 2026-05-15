@@ -2,7 +2,7 @@
 Example — customize payloads and disable specific decoy routes.
 """
 from flask import Flask
-from ai_defender import FlaskHoneypot, Honeypot, MORAL_LOCK, TOKEN_BLACKHOLE
+from decoyshield import FlaskHoneypot, Honeypot, MORAL_LOCK, TOKEN_BLACKHOLE
 
 app = Flask(__name__)
 
