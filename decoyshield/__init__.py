@@ -47,7 +47,7 @@ from .injectors import (
 from .payloads import MORAL_LOCK, PAYLOADS, TOKEN_BLACKHOLE, TRACEBACK
 from .registry import PayloadEntry, PayloadRegistry, registry
 
-__version__ = "0.7.1"
+__version__ = "0.8.0"
 __all__ = [
     # framework adapters
     "Honeypot",

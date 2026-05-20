@@ -38,9 +38,20 @@ time, classified by an attacker-fingerprint heuristic.
 
 ## Install
 
+**Python** (this repo's primary package):
+
 ```bash
 pip install decoyshield
 ```
+
+**Node.js** (sibling package, same payloads + fingerprinter, ESM + TypeScript):
+
+```bash
+npm install decoyshield
+```
+
+See [`node/README.md`](./node/README.md) for the Express middleware /
+Fastify plugin / callable-primitives API.
 
 > The PyPI distribution name is `decoyshield`, the Python import name is
 > `decoyshield`. So you install one, import the other:
@@ -431,7 +442,7 @@ Raw events as JSON: `/_defender/raw`.
 - **0.5** ✅ — `decoyshield` CLI (`serve`, `inject`, `analyze`, `bait`)
 - **0.6** ✅ — Payload registry + variants (`moral_lock_terse`, `token_blackhole_zk`, `traceback_oauth`) + `list` / `info` commands
 - **0.7** ✅ — Edge plugins (nginx / Caddy / Cloudflare Worker) via `decoyshield edge`
-- **0.8** — Node (Express / Fastify) middleware
+- **0.8** ✅ — Node.js sibling npm package (Express middleware + Fastify plugin)
 - **0.9** — Prometheus / OpenTelemetry exporter for capture metrics
 - **1.0** — API freeze, security audit, comprehensive docs
 

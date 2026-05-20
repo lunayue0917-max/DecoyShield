@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "decoyshield"
-version = "0.7.1"
+version = "0.8.0"
 description = "Counter-recon honeypot against agentic LLM attackers (PentestGPT / AutoGPT / LangChain agents). Five deploy modes: Flask drop-in, WSGI/ASGI middleware (Django/FastAPI/Starlette), callable primitives (inject_html/inject_json/@protect), `decoyshield` CLI, and edge configs for nginx/Caddy/Cloudflare Workers — no Python needed at the edge."
 readme = "README.md"
 license = { text = "MIT" }

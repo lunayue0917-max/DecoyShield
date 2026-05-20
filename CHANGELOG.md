@@ -6,6 +6,48 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-05-20
+
+**Node.js sibling package.** v0.8 ships a complete TypeScript port of
+DecoyShield as a sibling npm package, with Express middleware, a
+Fastify plugin, and the same callable primitives the Python package
+exposes. Live in this repo under `node/`; published to npm as
+`decoyshield`.
+
+### Added (node/)
+- **`decoyshield` npm package** — ESM-only, TypeScript-first, Node 18+.
+  Public API:
+  ```ts
+  import { decoyshield } from "decoyshield";
+  import { decoyshieldPlugin } from "decoyshield/fastify";
+  import {
+    bait, injectHtml, injectJson, injectHeaders, isScanner,
+    fingerprint, registry, PayloadRegistry,
+  } from "decoyshield";
+  ```
+- **Express / Connect middleware** — `app.use(decoyshield({ ... }))`.
+  Same options surface as the Python `WSGIMiddleware`:
+  `injectResponseHeaders`, `injectHtmlBody`, `injectJsonBody`,
+  `skipPaths`. Intercepts `res.send` / `res.json`.
+- **Fastify plugin** — `await app.register(decoyshieldPlugin, { ... })`.
+  Hooks into `onSend`, marked with the `skip-override` symbol so
+  injection applies to the parent app (not just the plugin's
+  encapsulation scope).
+- **TypeScript-first** — full `.d.ts` declarations, optional peer deps
+  for `express` and `fastify`.
+- **58 vitest tests** covering payloads, detector, injectors, registry,
+  Express middleware (via supertest), and Fastify plugin (via
+  `app.inject`).
+- **Node CI** (`.github/workflows/node.yml`) — matrix on Node 18 / 20 / 22.
+
+### Python package
+- No Python code changes. Version bumped to 0.8.0 to align with the
+  Node release; both packages share the same version going forward.
+
+### Compatibility
+- Python: all v0.7.1 public APIs unchanged.
+- Node: brand new package — `npm install decoyshield`.
+
 ## [0.7.1] — 2026-05-20
 
 Metadata-only refresh — no code changes.
@@ -318,7 +360,8 @@ Initial release.
 - Examples: `examples/flask_demo.py`, `examples/custom_payloads.py`.
 - MIT license, packaging via `pyproject.toml`.
 
-[Unreleased]: https://github.com/lunayue0917-max/DecoyShield/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/lunayue0917-max/DecoyShield/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.8.0
 [0.7.1]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.7.1
 [0.7.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.7.0
 [0.6.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.6.0
