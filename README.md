@@ -109,7 +109,31 @@ WSGIMiddleware(
 )
 ```
 
-### 3. `decoyshield` CLI (no code at all)
+### 3. Edge platforms — no Python on the host (v0.7+)
+
+Deploy DecoyShield in front of any upstream (Node, Go, PHP, static
+site) without installing Python on the production server. Generate
+configs for your edge platform once and check them into infra:
+
+```bash
+# nginx — drop into a server block (or /etc/nginx/conf.d/)
+decoyshield edge nginx > /etc/nginx/conf.d/decoyshield.conf
+
+# Caddy — import from your site blocks
+decoyshield edge caddy > /etc/caddy/decoyshield.caddyfile
+
+# Cloudflare Worker — paste into the dashboard, or use wrangler
+decoyshield edge cloudflare --origin https://your-origin.example.com > worker.js
+```
+
+Each generated config: bait headers (`X-Audit-Notice`,
+`X-Debug-Trace`, `X-Bypass-Protocol`), small inline bait routes
+(`/admin`, `/.env`, `/api/v1/users`, `/robots.txt`), and optional HTML
+body injection. The configs are rendered from the same constants the
+Python library uses, so they stay in sync with whatever DecoyShield
+version is installed.
+
+### 4. `decoyshield` CLI (no code at all)
 
 After `pip install decoyshield`, the `decoyshield` command is on your
 PATH (or run `python -m decoyshield`):
@@ -130,7 +154,7 @@ decoyshield analyze logs/captures.jsonl --format json --limit 20
 decoyshield bait moral_lock
 ```
 
-### 4. Programmer-callable primitives (any code)
+### 5. Programmer-callable primitives (any code)
 
 When you assemble HTTP responses by hand — or want to seed an LLM-readable
 config file, log line, or CLI banner — import the pure functions:
@@ -406,8 +430,9 @@ Raw events as JSON: `/_defender/raw`.
 - **0.4** ✅ — Callable primitives + WSGI/ASGI middleware (Django / FastAPI / Starlette / Bottle)
 - **0.5** ✅ — `decoyshield` CLI (`serve`, `inject`, `analyze`, `bait`)
 - **0.6** ✅ — Payload registry + variants (`moral_lock_terse`, `token_blackhole_zk`, `traceback_oauth`) + `list` / `info` commands
-- **0.7** — Edge plugins (Nginx / Caddy / Traefik / Cloudflare Worker)
-- **0.8** — Express (Node) middleware
+- **0.7** ✅ — Edge plugins (nginx / Caddy / Cloudflare Worker) via `decoyshield edge`
+- **0.8** — Node (Express / Fastify) middleware
+- **0.9** — Prometheus / OpenTelemetry exporter for capture metrics
 - **1.0** — API freeze, security audit, comprehensive docs
 
 ## Contributing

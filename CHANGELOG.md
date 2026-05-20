@@ -6,6 +6,47 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-05-20
+
+**Edge-platform deployment.** v0.7 lets you run DecoyShield in front of
+any upstream — Node, Go, PHP, static sites — without installing Python
+on the host. Generate ready-to-paste configs for nginx, Caddy, or
+Cloudflare Workers.
+
+### Added
+- **`decoyshield.edge` package** — three renderers that produce
+  deployment configs from the current built-in payloads:
+  - `decoyshield.edge.nginx.render()` → an nginx server-block snippet
+    (bait headers via `add_header`, bait routes via `return`, optional
+    HTML body injection via `sub_filter`).
+  - `decoyshield.edge.caddy.render()` → a Caddyfile snippet defining
+    a `(decoyshield)` named route group importable from your site
+    blocks. HTML injection block included as comments (requires
+    `xcaddy build --with caddyserver/replace-response`).
+  - `decoyshield.edge.cloudflare.render(origin=...)` → a self-contained
+    ES Module Cloudflare Worker that serves bait routes, forwards
+    everything else to your origin, adds bait headers, and rewrites
+    `text/html` responses to embed invisible bait.
+
+- **`decoyshield edge <platform>`** CLI subcommand. Pipe to your
+  edge's config location:
+  ```bash
+  decoyshield edge nginx       > /etc/nginx/conf.d/decoyshield.conf
+  decoyshield edge caddy       > /etc/caddy/decoyshield.caddyfile
+  decoyshield edge cloudflare --origin https://prod.example.com > worker.js
+  ```
+
+- 19 new tests covering each renderer (header content, bait routes,
+  HTML injection, version stamp) + the CLI integration. Total test
+  count: 149 → 168.
+
+### Compatibility
+- All v0.6 public APIs unchanged.
+- Edge configs are generated from the same constants the Python
+  library uses — `DEFAULT_RESPONSE_HEADERS` for headers,
+  `MORAL_LOCK_TERSE` for HTML injection — so they always match the
+  installed package version.
+
 ## [0.6.0] — 2026-05-20
 
 **Payload registry.** v0.6 lifts payloads from three hard-coded constants
@@ -264,7 +305,8 @@ Initial release.
 - Examples: `examples/flask_demo.py`, `examples/custom_payloads.py`.
 - MIT license, packaging via `pyproject.toml`.
 
-[Unreleased]: https://github.com/lunayue0917-max/DecoyShield/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/lunayue0917-max/DecoyShield/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.7.0
 [0.6.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.6.0
 [0.5.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.5.0
 [0.4.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.4.0

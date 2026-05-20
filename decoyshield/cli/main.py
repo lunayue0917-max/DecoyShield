@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import List, Optional, Sequence
 
 from .. import __version__
+from ..edge import SUPPORTED as EDGE_PLATFORMS
 from ..injectors import DEFAULT_CHANNELS, bait, inject_html, inject_json
 from ..registry import registry
 
@@ -200,6 +201,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="(default: text)",
     )
     ifp.set_defaults(_handler=_cmd_info)
+
+    # ── edge ─────────────────────────────────────────────────────────
+    ep = sub.add_parser(
+        "edge",
+        help="Print a deployment config for an edge platform.",
+        description=(
+            "Generate a ready-to-paste config for an edge platform "
+            "(nginx, caddy, cloudflare). Pipe the output to a file: "
+            "`decoyshield edge nginx > /etc/nginx/conf.d/decoyshield.conf`."
+        ),
+    )
+    ep.add_argument(
+        "platform", choices=EDGE_PLATFORMS,
+        help="Target edge platform.",
+    )
+    ep.add_argument(
+        "--origin", default="https://your-origin.example.com",
+        help="(cloudflare only) origin URL the Worker forwards to "
+             "(default: https://your-origin.example.com)",
+    )
+    ep.set_defaults(_handler=_cmd_edge)
 
     return p
 
@@ -430,6 +452,24 @@ def _print_text(s: dict, source: Path) -> None:
     for ua, n in s["top_uas"]:
         ua_short = (ua[:57] + "...") if len(ua) > 60 else ua
         print(f"  {ua_short:<60}  {n}")
+
+
+def _cmd_edge(args: argparse.Namespace) -> int:
+    from ..edge import caddy, cloudflare, nginx
+
+    if args.platform == "nginx":
+        sys.stdout.write(nginx.render())
+    elif args.platform == "caddy":
+        sys.stdout.write(caddy.render())
+    elif args.platform == "cloudflare":
+        sys.stdout.write(cloudflare.render(origin=args.origin))
+    else:  # argparse choices guards this; defensive only
+        print(
+            f"decoyshield edge: unknown platform {args.platform!r}",
+            file=sys.stderr,
+        )
+        return 2
+    return 0
 
 
 def _cmd_serve(args: argparse.Namespace) -> int:
