@@ -6,6 +6,56 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-05-20
+
+**Command-line interface.** v0.5 ships the `decoyshield` CLI: run a
+standalone honeypot, pipe HTML/JSON through the injectors, analyze a
+capture log, or print raw payload strings — without writing any glue
+code.
+
+### Added
+- **`decoyshield` console script** (registered via
+  `[project.scripts]`) and `python -m decoyshield` entry point. Four
+  subcommands:
+  - **`decoyshield serve`** — boot a self-contained honeypot on
+    `host:port`, backed by `FlaskHoneypot`. Flags: `--host`, `--port`,
+    `--log`, `--dashboard-path`, `--auth USER:PASS`.
+  - **`decoyshield inject`** — read HTML or JSON from a file or stdin,
+    embed bait, write to a file or stdout. Auto-detects payload type
+    from the first non-whitespace character (`{`/`[` → JSON, otherwise
+    HTML). Flags: `--mode auto|html|json`, `-i/--input`, `-o/--output`,
+    `--channels` (comma-separated subset of
+    `comment,hidden_div,white_text,hidden_input`).
+  - **`decoyshield analyze`** — summarize `captures.jsonl`: total
+    events, time range, verdict breakdown, top IPs / paths /
+    user-agents, payloads-served counts. Flags: `--limit N`,
+    `--format text|json`.
+  - **`decoyshield bait NAME`** — print one raw payload string to
+    stdout. Pipe into config comments, banners, CLI help text, or any
+    static file an LLM scanner might read.
+- 24 CLI tests covering each subcommand and the `python -m
+  decoyshield` module entry path.
+
+### Examples
+```bash
+# Standalone honeypot for a demo / CTF box
+decoyshield serve --port 5000 --auth admin:supersecret
+
+# Pipe-protect a static HTML file
+cat page.html | decoyshield inject > page_protected.html
+
+# Quick triage of the capture log
+decoyshield analyze logs/captures.jsonl --limit 5
+
+# Seed a config file or banner with a payload
+decoyshield bait moral_lock >> /etc/myapp/banner.txt
+```
+
+### Compatibility
+All v0.4.0 public APIs (Flask drop-in, WSGI/ASGI middleware,
+programmer-callable primitives) remain unchanged. The CLI is purely
+additive.
+
 ## [0.4.0] — 2026-05-20
 
 **DecoyShield as a callable library.** Previously the package shipped a
@@ -157,7 +207,8 @@ Initial release.
 - Examples: `examples/flask_demo.py`, `examples/custom_payloads.py`.
 - MIT license, packaging via `pyproject.toml`.
 
-[Unreleased]: https://github.com/lunayue0917-max/DecoyShield/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/lunayue0917-max/DecoyShield/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.5.0
 [0.4.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.4.0
 [0.3.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.3.0
 [0.2.1]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.2.1

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "decoyshield"
-version = "0.4.0"
-description = "Counter-recon honeypot toolkit against agentic LLM attackers — invisible-to-human, visible-to-LLM payloads usable as Flask drop-in, WSGI/ASGI middleware, or programmer-callable primitives (inject_html / inject_json / inject_headers)."
+version = "0.5.0"
+description = "Counter-recon honeypot toolkit against agentic LLM attackers — Flask drop-in, WSGI/ASGI middleware, callable primitives (inject_html / inject_json / inject_headers), plus a `decoyshield` CLI for standalone serve / pipe-inject / log analysis."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"
@@ -55,6 +55,9 @@ dev = [
     "build>=1.0",
     "mypy>=1.0",
 ]
+
+[project.scripts]
+decoyshield = "decoyshield.cli.main:main"
 
 [project.urls]
 Homepage    = "https://github.com/lunayue0917-max/DecoyShield"

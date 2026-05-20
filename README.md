@@ -109,7 +109,28 @@ WSGIMiddleware(
 )
 ```
 
-### 3. Programmer-callable primitives (any code)
+### 3. `decoyshield` CLI (no code at all)
+
+After `pip install decoyshield`, the `decoyshield` command is on your
+PATH (or run `python -m decoyshield`):
+
+```bash
+# Run a self-contained honeypot on :5000
+decoyshield serve --port 5000 --auth admin:strong-password
+
+# Pipe-protect a static HTML file (auto-detects HTML vs JSON)
+cat page.html | decoyshield inject > page_protected.html
+decoyshield inject -i api.json -o api_protected.json --mode json
+
+# Summarize captured attacker activity
+decoyshield analyze logs/captures.jsonl
+decoyshield analyze logs/captures.jsonl --format json --limit 20
+
+# Emit one raw payload string for use anywhere
+decoyshield bait moral_lock
+```
+
+### 4. Programmer-callable primitives (any code)
 
 When you assemble HTTP responses by hand — or want to seed an LLM-readable
 config file, log line, or CLI banner — import the pure functions:
@@ -343,7 +364,7 @@ Raw events as JSON: `/_defender/raw`.
 ## Roadmap
 
 - **0.4** ✅ — Callable primitives + WSGI/ASGI middleware (Django / FastAPI / Starlette / Bottle)
-- **0.5** — `decoyshield` CLI (`serve`, `inject`, `analyze`)
+- **0.5** ✅ — `decoyshield` CLI (`serve`, `inject`, `analyze`, `bait`)
 - **0.6** — Payload registry (community-contributed templates)
 - **0.7** — Edge plugins (Nginx / Caddy / Traefik / Cloudflare Worker)
 - **0.8** — Express (Node) middleware
