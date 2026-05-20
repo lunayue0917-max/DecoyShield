@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "decoyshield"
-version = "0.3.0"
-description = "Web-layer counter-recon honeypot against agentic LLM attackers — drops invisible-to-human, visible-to-LLM payloads into your Flask/HTTP responses to halt, stall, or fingerprint AI-driven penetration scans."
+version = "0.4.0"
+description = "Counter-recon honeypot toolkit against agentic LLM attackers — invisible-to-human, visible-to-LLM payloads usable as Flask drop-in, WSGI/ASGI middleware, or programmer-callable primitives (inject_html / inject_json / inject_headers)."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"

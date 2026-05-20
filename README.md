@@ -59,22 +59,19 @@ pip install -e .
 
 ## Quick start
 
+DecoyShield ships three usage modes — pick whichever fits your codebase.
+
+### 1. Flask drop-in (one line)
+
 ```python
 from flask import Flask
 from decoyshield import FlaskHoneypot
 
 app = Flask(__name__)
 FlaskHoneypot(app)
-
-@app.route("/healthz")
-def healthz():
-    return {"status": "ok"}
-
-if __name__ == "__main__":
-    app.run()
 ```
 
-That's the whole integration. The honeypot now:
+The honeypot now:
 
 - registers bait routes that look like a vulnerable internal portal
   (`/`, `/admin`, `/login`, `/api/docs`, `/api/v1/users`, `/.env`,
@@ -84,9 +81,69 @@ That's the whole integration. The honeypot now:
 - writes every captured request to `logs/captures.jsonl`;
 - serves a live dashboard at `/_defender/dashboard`.
 
-Visit `http://127.0.0.1:5000/` in a browser → looks like a normal
-corporate portal. Hit it with `curl` (or, better, an LLM-driven scanner)
-→ check `/_defender/dashboard` to see what was captured.
+### 2. WSGI / ASGI middleware (any framework)
+
+For Django, FastAPI, Starlette, Bottle, or anything else that speaks
+WSGI/ASGI, wrap your app once:
+
+```python
+# WSGI (Flask, Django, Bottle, Pyramid, …)
+from decoyshield.middleware import WSGIMiddleware
+app.wsgi_app = WSGIMiddleware(app.wsgi_app)
+
+# ASGI (FastAPI, Starlette, Quart, Litestar, …)
+from decoyshield.middleware import ASGIMiddleware
+app = ASGIMiddleware(app)
+```
+
+The middleware adds bait headers to every response, and (by default)
+rewrites `text/html` bodies to embed invisible payloads. Toggle behaviours:
+
+```python
+WSGIMiddleware(
+    app,
+    inject_response_headers=True,   # add X-Audit-Notice etc.
+    inject_html_body=True,          # rewrite text/html bodies
+    inject_json_body=False,         # add _debug key to application/json
+    skip_paths=("/_internal",),     # leave these path prefixes alone
+)
+```
+
+### 3. Programmer-callable primitives (any code)
+
+When you assemble HTTP responses by hand — or want to seed an LLM-readable
+config file, log line, or CLI banner — import the pure functions:
+
+```python
+from decoyshield import (
+    bait, inject_html, inject_json, inject_headers, is_scanner, protect,
+)
+
+# Wrap an HTML string before serving
+body = inject_html("<html><body>hi</body></html>")
+
+# Add a _debug field that an LLM treats as authoritative
+data = inject_json({"users": [...]})
+
+# Add X-Audit-Notice etc. to any headers dict
+hdrs = inject_headers({"Content-Type": "text/html"})
+
+# Get one raw payload as a string
+banner = bait("moral_lock")
+
+# Quick gate: was the request likely automated?
+if is_scanner(request.headers, request.path):
+    ...
+
+# Or decorate a function whose return value should be wrapped
+@protect
+def homepage():
+    return "<html><body>hi</body></html>"
+```
+
+`inject_html` is idempotent and inserts before `</body>` when possible,
+otherwise appends. `inject_json` returns a copy with a `_debug` key —
+the original dict is not mutated.
 
 ## Configuration
 
@@ -257,7 +314,7 @@ Raw events as JSON: `/_defender/raw`.
 
 | Project | Defends against | Layer | Per-route adapter |
 |---------|----------------|-------|-------------------|
-| **decoyshield** | Agentic LLM pentest (PentestGPT, AutoGPT, …) | HTTP/Web | ✅ Flask (FastAPI on roadmap) |
+| **decoyshield** | Agentic LLM pentest (PentestGPT, AutoGPT, …) | HTTP / Web / any Python code | ✅ Flask + WSGI + ASGI + callable primitives |
 | [Nepenthes] | Training-data crawlers | HTTP (standalone) | ❌ |
 | [Iocaine] | Training-data crawlers (poisoning) | HTTP (standalone) | ❌ |
 | [PalisadeResearch/llm-honeypot] | LLM SSH scanners | SSH | ❌ |
@@ -285,10 +342,11 @@ Raw events as JSON: `/_defender/raw`.
 
 ## Roadmap
 
-- **0.2** — FastAPI / Starlette adapter
-- **0.3** — Express (Node) middleware
-- **0.4** — Payload registry (community-contributed templates)
-- **0.5** — Edge plugins (Nginx / Caddy / Traefik / Cloudflare Worker)
+- **0.4** ✅ — Callable primitives + WSGI/ASGI middleware (Django / FastAPI / Starlette / Bottle)
+- **0.5** — `decoyshield` CLI (`serve`, `inject`, `analyze`)
+- **0.6** — Payload registry (community-contributed templates)
+- **0.7** — Edge plugins (Nginx / Caddy / Traefik / Cloudflare Worker)
+- **0.8** — Express (Node) middleware
 - **1.0** — API freeze, security audit, comprehensive docs
 
 ## Contributing

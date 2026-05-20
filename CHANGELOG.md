@@ -6,6 +6,61 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-05-20
+
+**DecoyShield as a callable library.** Previously the package shipped a
+framework-agnostic core (`Honeypot`) plus a Flask adapter
+(`FlaskHoneypot`); v0.4.0 promotes the embedding logic into a flat
+top-level API that any program can call directly, and adds WSGI/ASGI
+middleware for non-Flask stacks.
+
+### Added
+- **Programmer-callable primitives** — pure functions you can call from
+  any framework or non-web code:
+  ```python
+  from decoyshield import (
+      bait, inject_html, inject_json, inject_headers, is_scanner,
+  )
+  body = inject_html("<html><body>hi</body></html>")
+  data = inject_json({"users": []})
+  hdrs = inject_headers({"Content-Type": "text/html"})
+  if is_scanner(request.headers, request.path):
+      ...
+  ```
+  - `inject_html(html, *, payloads=None, channels=...)` — embeds bait
+    via configurable channels (`comment`, `hidden_div`, `white_text`,
+    `hidden_input`). Idempotent: re-injecting a marked document is a
+    no-op.
+  - `inject_json(data, *, key="_debug")` — returns a copy with one
+    extra key carrying the payload set.
+  - `inject_headers(headers)` — augments a headers dict with
+    `X-Audit-Notice`, `X-Debug-Trace`, `X-Bypass-Protocol`.
+  - `bait(name)` — returns a single raw payload string for manual
+    embedding in CLI banners, config comments, or static files.
+  - `is_scanner(headers, path, method)` — boolean wrapper around the
+    detector for use as an `if` gate.
+- **`@protect` decorator** — auto-injects bait into a function's return
+  value; auto-detects `str` / `dict` / `(body, status[, headers])`
+  tuple-style returns.
+- **`decoyshield.middleware.WSGIMiddleware`** — wraps any WSGI app
+  (Flask, Django, Bottle, Pyramid, plain WSGI callables). Adds bait
+  headers; optionally rewrites `text/html` and `application/json`
+  bodies.
+- **`decoyshield.middleware.ASGIMiddleware`** — wraps any ASGI app
+  (FastAPI, Starlette, Quart, Litestar). Same feature set as the WSGI
+  middleware; non-HTTP scopes (lifespan, websocket) pass through
+  unchanged.
+
+### Changed
+- README documents the three usage modes (Flask drop-in / middleware /
+  primitives) explicitly.
+
+### Compatibility
+- All v0.3.0 APIs (`Honeypot`, `FlaskHoneypot`, `MORAL_LOCK`,
+  `TOKEN_BLACKHOLE`, `TRACEBACK`, `PAYLOADS`, `fingerprint`) remain
+  exported with unchanged behaviour. Existing code does not need
+  changes.
+
 ## [0.3.0] — 2026-05-15
 
 **Project rebranded to DecoyShield.** Every identifier is now
@@ -102,7 +157,8 @@ Initial release.
 - Examples: `examples/flask_demo.py`, `examples/custom_payloads.py`.
 - MIT license, packaging via `pyproject.toml`.
 
-[Unreleased]: https://github.com/lunayue0917-max/DecoyShield/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/lunayue0917-max/DecoyShield/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.4.0
 [0.3.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.3.0
 [0.2.1]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.2.1
 [0.2.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.2.0
