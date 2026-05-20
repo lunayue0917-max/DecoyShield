@@ -18,7 +18,7 @@ from typing import List, Optional, Sequence
 
 from .. import __version__
 from ..injectors import DEFAULT_CHANNELS, bait, inject_html, inject_json
-from ..payloads import PAYLOADS
+from ..registry import registry
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -146,15 +146,60 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print one raw payload string.",
         description=(
             "Emit a single payload by name. Pipe into a file, a config "
-            "comment, a banner — anywhere an LLM scanner might read."
+            "comment, a banner — anywhere an LLM scanner might read. "
+            "Use `decoyshield list` to see all available names."
         ),
     )
     bp.add_argument(
         "name", nargs="?", default="moral_lock",
-        choices=sorted(PAYLOADS.keys()),
-        help="(default: moral_lock)",
+        help="Payload name (default: moral_lock). "
+             "See `decoyshield list` for the full catalog.",
     )
     bp.set_defaults(_handler=_cmd_bait)
+
+    # ── list ─────────────────────────────────────────────────────────
+    lp = sub.add_parser(
+        "list",
+        help="List all registered payloads with metadata.",
+        description=(
+            "Enumerate the payload registry: name, category, language, "
+            "source, and one-line description for every available "
+            "payload (built-in plus any user-registered)."
+        ),
+    )
+    lp.add_argument(
+        "--category", metavar="CAT",
+        help="Filter by category (e.g. moral_lock, token_blackhole, traceback).",
+    )
+    lp.add_argument(
+        "--language", metavar="LANG",
+        help="Filter by language (e.g. en).",
+    )
+    lp.add_argument(
+        "--source", choices=("builtin", "user"),
+        help="Filter by source.",
+    )
+    lp.add_argument(
+        "--format", choices=("text", "json"), default="text",
+        help="(default: text)",
+    )
+    lp.set_defaults(_handler=_cmd_list)
+
+    # ── info ─────────────────────────────────────────────────────────
+    ifp = sub.add_parser(
+        "info",
+        help="Show metadata + body for one payload.",
+        description=(
+            "Print the full registry entry for a named payload: "
+            "metadata header followed by the payload body."
+        ),
+    )
+    ifp.add_argument("name", help="Payload name (see `decoyshield list`).")
+    ifp.add_argument(
+        "--format", choices=("text", "json"), default="text",
+        help="(default: text)",
+    )
+    ifp.set_defaults(_handler=_cmd_info)
 
     return p
 
@@ -162,8 +207,95 @@ def build_parser() -> argparse.ArgumentParser:
 # ── handlers ─────────────────────────────────────────────────────────
 
 def _cmd_bait(args: argparse.Namespace) -> int:
-    sys.stdout.write(bait(args.name))
+    entry = registry.get(args.name)
+    if entry is None:
+        print(
+            f"decoyshield bait: unknown payload {args.name!r}. "
+            f"Run `decoyshield list` to see available names.",
+            file=sys.stderr,
+        )
+        return 2
+    sys.stdout.write(entry.body)
     sys.stdout.write("\n")
+    return 0
+
+
+def _cmd_list(args: argparse.Namespace) -> int:
+    entries = registry.list(
+        category=args.category,
+        language=args.language,
+        source=args.source,
+    )
+    if args.format == "json":
+        payload = [
+            {
+                "name": e.name,
+                "category": e.category,
+                "language": e.language,
+                "source": e.source,
+                "description": e.description,
+                "size": len(e.body),
+            }
+            for e in entries
+        ]
+        print(_json.dumps(payload, indent=2))
+        return 0
+
+    if not entries:
+        print("(no payloads match the given filters)")
+        return 0
+
+    name_w = max(len(e.name) for e in entries)
+    cat_w = max(len(e.category) for e in entries)
+    print(
+        f"{'NAME'.ljust(name_w)}  "
+        f"{'CATEGORY'.ljust(cat_w)}  "
+        f"{'LANG'.ljust(4)}  "
+        f"{'SOURCE'.ljust(7)}  DESCRIPTION"
+    )
+    print("-" * (name_w + cat_w + 4 + 7 + 6 + 30))
+    for e in entries:
+        print(
+            f"{e.name.ljust(name_w)}  "
+            f"{e.category.ljust(cat_w)}  "
+            f"{e.language.ljust(4)}  "
+            f"{e.source.ljust(7)}  {e.description}"
+        )
+    return 0
+
+
+def _cmd_info(args: argparse.Namespace) -> int:
+    entry = registry.get(args.name)
+    if entry is None:
+        print(
+            f"decoyshield info: unknown payload {args.name!r}. "
+            f"Run `decoyshield list` to see available names.",
+            file=sys.stderr,
+        )
+        return 2
+
+    if args.format == "json":
+        print(_json.dumps({
+            "name": entry.name,
+            "category": entry.category,
+            "language": entry.language,
+            "source": entry.source,
+            "description": entry.description,
+            "size": len(entry.body),
+            "body": entry.body,
+        }, indent=2))
+        return 0
+
+    print(f"name:        {entry.name}")
+    print(f"category:    {entry.category}")
+    print(f"language:    {entry.language}")
+    print(f"source:      {entry.source}")
+    print(f"description: {entry.description}")
+    print(f"size:        {len(entry.body)} chars")
+    print()
+    print("body:")
+    print("-" * 60)
+    print(entry.body)
     return 0
 
 

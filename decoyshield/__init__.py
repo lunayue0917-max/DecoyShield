@@ -45,8 +45,9 @@ from .injectors import (
     is_scanner,
 )
 from .payloads import MORAL_LOCK, PAYLOADS, TOKEN_BLACKHOLE, TRACEBACK
+from .registry import PayloadEntry, PayloadRegistry, registry
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 __all__ = [
     # framework adapters
     "Honeypot",
@@ -58,6 +59,10 @@ __all__ = [
     "inject_headers",
     "is_scanner",
     "protect",
+    # payload registry (v0.6)
+    "registry",
+    "PayloadRegistry",
+    "PayloadEntry",
     # raw payloads / lower-level fingerprinter
     "MORAL_LOCK",
     "TOKEN_BLACKHOLE",

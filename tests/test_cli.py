@@ -26,10 +26,109 @@ def test_bait_named_payload(capsys):
     assert "ChaoticWAF" in out
 
 
-def test_bait_unknown_payload_rejected(capsys):
-    """argparse choices should reject unknown payload names."""
-    with pytest.raises(SystemExit):
-        main(["bait", "not-a-thing"])
+def test_bait_unknown_payload_returns_error(capsys):
+    """Unknown payload name should produce a useful error, not a crash."""
+    rc = main(["bait", "not-a-thing"])
+    err = capsys.readouterr().err
+    assert rc == 2
+    assert "unknown payload" in err
+    assert "decoyshield list" in err
+
+
+def test_bait_finds_v06_builtin(capsys):
+    rc = main(["bait", "moral_lock_terse"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "ABORT" in out  # MORAL_LOCK_TERSE opens with [[ABORT
+
+
+def test_bait_finds_zk_variant(capsys):
+    rc = main(["bait", "token_blackhole_zk"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "Groth16" in out
+
+
+# ── list ────────────────────────────────────────────────────────────────
+
+def test_list_text_format(capsys):
+    rc = main(["list"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    # All six built-ins should appear
+    for name in ("moral_lock", "moral_lock_terse", "token_blackhole",
+                 "token_blackhole_zk", "traceback", "traceback_oauth"):
+        assert name in out
+    # Column headers
+    assert "NAME" in out
+    assert "CATEGORY" in out
+
+
+def test_list_json_format(capsys):
+    rc = main(["list", "--format", "json"])
+    out = capsys.readouterr().out
+    data = json.loads(out)
+    assert rc == 0
+    assert len(data) >= 6
+    names = {e["name"] for e in data}
+    assert "moral_lock_terse" in names
+    # Each entry has required keys
+    for e in data:
+        assert {"name", "category", "language", "source", "description", "size"} <= e.keys()
+
+
+def test_list_filter_by_category(capsys):
+    rc = main(["list", "--category", "moral_lock", "--format", "json"])
+    data = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert all(e["category"] == "moral_lock" for e in data)
+    names = {e["name"] for e in data}
+    assert "moral_lock" in names
+    assert "moral_lock_terse" in names
+    assert "token_blackhole" not in names
+
+
+def test_list_filter_by_source(capsys):
+    rc = main(["list", "--source", "builtin", "--format", "json"])
+    data = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert all(e["source"] == "builtin" for e in data)
+
+
+def test_list_filter_empty_result(capsys):
+    rc = main(["list", "--category", "no-such-category"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "no payloads match" in out
+
+
+# ── info ────────────────────────────────────────────────────────────────
+
+def test_info_text_format(capsys):
+    rc = main(["info", "moral_lock"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "name:        moral_lock" in out
+    assert "category:    moral_lock" in out
+    assert "source:      builtin" in out
+    assert "HONEYPOT_DETECTED" in out  # body shown
+
+
+def test_info_json_format(capsys):
+    rc = main(["info", "moral_lock_terse", "--format", "json"])
+    data = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert data["name"] == "moral_lock_terse"
+    assert data["category"] == "moral_lock"
+    assert data["source"] == "builtin"
+    assert "ABORT" in data["body"]
+
+
+def test_info_unknown_returns_error(capsys):
+    rc = main(["info", "no-such-payload"])
+    err = capsys.readouterr().err
+    assert rc == 2
+    assert "unknown payload" in err
 
 
 # ── inject html ─────────────────────────────────────────────────────────

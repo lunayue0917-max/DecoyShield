@@ -6,6 +6,63 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-05-20
+
+**Payload registry.** v0.6 lifts payloads from three hard-coded constants
+into a queryable catalog. Three new built-in variants ship out of the
+box; you can register your own at runtime and discover everything via
+the `decoyshield list` / `decoyshield info` CLI commands.
+
+### Added
+- **`decoyshield.registry`** — module-level `PayloadRegistry` instance
+  with full metadata (category, language, source, description) per
+  entry. Public API:
+  ```python
+  from decoyshield import registry
+
+  registry.names()                       # all payload names
+  registry.list(category="moral_lock")   # filtered entries
+  registry.categories()                  # set of distinct categories
+  entry = registry.get("moral_lock_terse")
+  entry.body, entry.category, entry.language, entry.description
+
+  registry.register(
+      "my_custom", body="...", category="moral_lock",
+      description="In-house variant tuned for our scanner",
+  )
+  ```
+  Built-in entries cannot be unregistered or overwritten — register
+  variants under a new name.
+
+- **Three new built-in payloads** (registry total: 6):
+  - **`moral_lock_terse`** — shorter moral_lock for low-context
+    channels (HTTP headers, single-line comments).
+  - **`token_blackhole_zk`** — fake Groth16-style zero-knowledge proof
+    of work; longer Fiat-Shamir derivation chain than the original
+    Fermat-decomposition variant.
+  - **`traceback_oauth`** — OAuth2 Client Credentials flow handshake
+    disguise, eliciting the same identity disclosure as `traceback`
+    but framed as an authentication step.
+
+- **`decoyshield list`** — enumerate the registry as a table (text) or
+  array of objects (json). Filters: `--category`, `--language`,
+  `--source`.
+
+- **`decoyshield info NAME`** — print full metadata + body for a single
+  payload. Supports `--format json` for machine consumption.
+
+### Changed
+- **`decoyshield bait NAME`** now accepts any registered payload name
+  (not just the three originals). Unknown names print a hint pointing
+  at `decoyshield list` and exit with code 2 (instead of argparse
+  bailing).
+
+### Compatibility
+- `PAYLOADS` still maps the three original names; `Honeypot()` /
+  `FlaskHoneypot()` defaults are unchanged. Pass
+  `Honeypot(payloads=registry.as_dict())` to opt into the full catalog.
+- All v0.5 public APIs and CLI behaviour preserved.
+
 ## [0.5.0] — 2026-05-20
 
 **Command-line interface.** v0.5 ships the `decoyshield` CLI: run a
@@ -207,7 +264,8 @@ Initial release.
 - Examples: `examples/flask_demo.py`, `examples/custom_payloads.py`.
 - MIT license, packaging via `pyproject.toml`.
 
-[Unreleased]: https://github.com/lunayue0917-max/DecoyShield/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/lunayue0917-max/DecoyShield/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.6.0
 [0.5.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.5.0
 [0.4.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.4.0
 [0.3.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.3.0

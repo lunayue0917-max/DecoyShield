@@ -214,6 +214,46 @@ hp = Honeypot(payloads={
 FlaskHoneypot(app, honeypot=hp)
 ```
 
+### Payload registry (v0.6+)
+
+The registry is a queryable catalog of every payload (built-in plus any
+you register at runtime). It carries metadata: category, language,
+source, description.
+
+```python
+from decoyshield import Honeypot, registry
+
+# Discover what's available
+registry.names()
+# ['moral_lock', 'moral_lock_terse', 'token_blackhole',
+#  'token_blackhole_zk', 'traceback', 'traceback_oauth']
+
+registry.list(category="moral_lock")          # filtered entries
+entry = registry.get("token_blackhole_zk")
+entry.description                              # short summary
+
+# Register your own (built-ins are not replaceable)
+registry.register(
+    "my_custom",
+    body="...payload string...",
+    category="moral_lock",
+    description="In-house variant tuned for our scanner",
+)
+
+# Use the full registry catalog (built-ins + your additions) with Honeypot
+hp = Honeypot(payloads=registry.as_dict())
+FlaskHoneypot(app, honeypot=hp)
+```
+
+Discover from the CLI too:
+
+```bash
+decoyshield list                          # table of all payloads + metadata
+decoyshield list --category moral_lock    # filter
+decoyshield list --format json            # machine-readable
+decoyshield info token_blackhole_zk       # full metadata + body
+```
+
 ### Custom fingerprinter
 
 ```python
@@ -365,7 +405,7 @@ Raw events as JSON: `/_defender/raw`.
 
 - **0.4** ✅ — Callable primitives + WSGI/ASGI middleware (Django / FastAPI / Starlette / Bottle)
 - **0.5** ✅ — `decoyshield` CLI (`serve`, `inject`, `analyze`, `bait`)
-- **0.6** — Payload registry (community-contributed templates)
+- **0.6** ✅ — Payload registry + variants (`moral_lock_terse`, `token_blackhole_zk`, `traceback_oauth`) + `list` / `info` commands
 - **0.7** — Edge plugins (Nginx / Caddy / Traefik / Cloudflare Worker)
 - **0.8** — Express (Node) middleware
 - **1.0** — API freeze, security audit, comprehensive docs

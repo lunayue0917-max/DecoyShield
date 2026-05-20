@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "decoyshield"
-version = "0.5.0"
+version = "0.6.0"
 description = "Counter-recon honeypot toolkit against agentic LLM attackers — Flask drop-in, WSGI/ASGI middleware, callable primitives (inject_html / inject_json / inject_headers), plus a `decoyshield` CLI for standalone serve / pipe-inject / log analysis."
 readme = "README.md"
 license = { text = "MIT" }
