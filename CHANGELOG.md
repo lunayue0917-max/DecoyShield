@@ -6,6 +6,19 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.1] — 2026-05-20
+
+Metadata-only refresh — no code changes.
+
+### Changed
+- `pyproject.toml` description now reflects the five deploy modes (CLI,
+  callable primitives, WSGI/ASGI middleware, Flask drop-in, edge
+  configs) so the PyPI project page summarises the current feature set
+  instead of the v0.5 surface.
+- `keywords` expanded to include `fastapi`, `django`, `starlette`,
+  `wsgi`, `asgi`, `middleware`, `nginx`, `caddy`,
+  `cloudflare-workers`, `cli`, `prompt-injection-defense`.
+
 ## [0.7.0] — 2026-05-20
 
 **Edge-platform deployment.** v0.7 lets you run DecoyShield in front of
@@ -305,7 +318,8 @@ Initial release.
 - Examples: `examples/flask_demo.py`, `examples/custom_payloads.py`.
 - MIT license, packaging via `pyproject.toml`.
 
-[Unreleased]: https://github.com/lunayue0917-max/DecoyShield/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/lunayue0917-max/DecoyShield/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.7.1
 [0.7.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.7.0
 [0.6.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.6.0
 [0.5.0]: https://github.com/lunayue0917-max/DecoyShield/releases/tag/v0.5.0
